@@ -10,7 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Create Groq client
+# Initialize Groq client
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
@@ -42,25 +42,36 @@ def chat():
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful AI assistant. Answer clearly and politely."
+                    "content": """
+You are a smart AI assistant.
+
+Rules:
+- Answer in under 20 words whenever possible.
+- Give direct and natural responses.
+- Reply with one word if that is enough.
+- Use only one short sentence for definitions.
+- Do NOT use bullet points unless the user asks.
+- Do NOT give long explanations unless the user specifically requests them.
+- Be friendly and accurate.
+"""
                 },
                 {
                     "role": "user",
                     "content": user_input
                 }
             ],
-            temperature=0.7,
-            max_tokens=1024
+            temperature=0.3,
+            max_tokens=60
         )
 
-        answer = response.choices[0].message.content
+        answer = response.choices[0].message.content.strip()
 
     except Exception as e:
-        print(e)
-        answer = f"Error: {str(e)}"
+        print("Groq Error:", e)
+        answer = "Sorry, I'm unable to answer right now."
 
     return jsonify(reply=answer)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
